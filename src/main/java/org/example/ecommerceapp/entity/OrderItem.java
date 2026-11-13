@@ -1,3 +1,4 @@
+
 package org.example.ecommerceapp.entity;
 
 import jakarta.persistence.*;
@@ -14,34 +15,31 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    // Historical product information
+    @Column(nullable = false)
+    private Long productIdSnapshot;
+
+    @Column(nullable = false)
+    private String productNameSnapshot;
+
+    @Column(nullable = false)
     private int quantity;
 
+    // Purchase-time monetary information
+    @Column(nullable = false)
     private double price;
+
+    @Column(nullable = false)
     private double subtotal;
 
     public OrderItem() {
     }
-
-    public OrderItem(Long id,
-                     Order order,
-                     Product product,
-                     int quantity,
-                     double price) {
-
-        this.id = id;
-        this.order = order;
-        this.product = product;
-        this.quantity = quantity;
-        this.price = price;
-    }
-
-    // getters setters
 }

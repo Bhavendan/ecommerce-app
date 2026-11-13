@@ -1,11 +1,15 @@
+
 package org.example.ecommerceapp.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.example.ecommerceapp.dto.OrderDto;
+import org.example.ecommerceapp.dto.ShippingAddressDto;
 import org.example.ecommerceapp.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +25,7 @@ public class OrderController {
 
     private final OrderService service;
 
-    public OrderController(
-            OrderService service) {
-
+    public OrderController(OrderService service) {
         this.service = service;
     }
 
@@ -34,16 +36,15 @@ public class OrderController {
             summary = "Place an order",
             description = "Creates a new order for the authenticated user"
     )
-    public ResponseEntity<OrderDto> placeOrder() {
+    public ResponseEntity<OrderDto> placeOrder(
+            @Valid @RequestBody ShippingAddressDto address) {
 
-        String email =
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication()
-                        .getName();
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
 
-        OrderDto order =
-                service.placeOrder(email);
+        OrderDto order = service.placeOrder(email, address);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -59,11 +60,10 @@ public class OrderController {
     )
     public ResponseEntity<List<OrderDto>> getUserOrders() {
 
-        String email =
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication()
-                        .getName();
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
 
         return ResponseEntity.ok(
                 service.getUserOrders(email)
@@ -75,13 +75,18 @@ public class OrderController {
     @GetMapping("/{orderId}")
     @Operation(
             summary = "Get order by ID",
-            description = "Returns details of a specific order"
+            description = "Returns details of a specific order belonging to the authenticated user"
     )
     public ResponseEntity<OrderDto> getOrderById(
             @PathVariable Long orderId) {
 
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
         return ResponseEntity.ok(
-                service.getOrderById(orderId)
+                service.getOrderById(orderId, email)
         );
     }
 
@@ -90,12 +95,17 @@ public class OrderController {
     @DeleteMapping("/{orderId}")
     @Operation(
             summary = "Cancel order",
-            description = "Cancels an existing order"
+            description = "Cancels an order belonging to the authenticated user"
     )
     public ResponseEntity<Void> cancelOrder(
             @PathVariable Long orderId) {
 
-        service.cancelOrder(orderId);
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        service.cancelOrder(orderId, email);
 
         return ResponseEntity
                 .noContent()

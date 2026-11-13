@@ -2,21 +2,26 @@ package org.example.ecommerceapp.serviceIMPL;
 
 import org.example.ecommerceapp.dto.CategoryDto;
 import org.example.ecommerceapp.entity.Category;
+import org.example.ecommerceapp.exception.BadRequestException;
 import org.example.ecommerceapp.exception.ResourceNotFoundException;
 import org.example.ecommerceapp.repository.CategoryRepository;
+import org.example.ecommerceapp.repository.ProductRepository;
 import org.example.ecommerceapp.service.CategoryService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-public class CategoryServiceImpl implements CategoryService {
+public class    CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository repo;
+    private final ProductRepository productRepo;
 
-    public CategoryServiceImpl(CategoryRepository repo) {
+    public CategoryServiceImpl(CategoryRepository repo, ProductRepository productRepo) {
 
         this.repo = repo;
+        this.productRepo = productRepo;
     }
 
     @Override
@@ -58,9 +63,17 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public void deleteCategory(Long id) {
 
-        repo.deleteById(id);
+        Category category = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        if (productRepo.existsByCategoryId(id)) {
+            throw new BadRequestException("Cannot delete category with associated products");
+        }
+
+        repo.delete(category);
     }
 
     private CategoryDto mapToDto(Category category) {

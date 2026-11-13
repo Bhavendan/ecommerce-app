@@ -1,6 +1,7 @@
 package org.example.ecommerceapp.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -10,6 +11,8 @@ import org.example.ecommerceapp.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+
 
 @RestController
 @RequestMapping("/api/public")
@@ -26,7 +29,7 @@ public class AuthController {
     }
 
     // REGISTER USER
-
+    @SecurityRequirements()
     @PostMapping("/register")
     @Operation(
             summary = "Register a new user",
@@ -45,7 +48,7 @@ public class AuthController {
     }
 
     // LOGIN USER
-
+    @SecurityRequirements()
     @PostMapping("/login")
     @Operation(
             summary = "Authenticate user",
@@ -54,10 +57,15 @@ public class AuthController {
     public ResponseEntity<String> login(
             @RequestBody LoginRequest request,
             HttpServletRequest httpRequest) {
+try {
+    String token =
+            service.verifyUser(request);
 
-        String token =
-                service.verifyUser(request);
-
-        return ResponseEntity.ok(token);
+    return ResponseEntity.ok(token);
+}
+catch (Exception e){
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body("Invalid email or password");
+}
     }
 }

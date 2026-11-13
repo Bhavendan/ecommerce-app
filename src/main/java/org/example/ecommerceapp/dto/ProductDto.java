@@ -1,7 +1,9 @@
 package org.example.ecommerceapp.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,8 +21,9 @@ public class ProductDto {
     @Positive(message = "Price must be positive")
     private double price;
 
-    @Positive(message = "Stock must be positive")
-    private int stock;
+    @NotNull(message = "Stock is required")
+    @PositiveOrZero(message = "Stock cannot be negative")
+    private Integer stock;
 
     // category info only
     private Long categoryId;

@@ -1,3 +1,4 @@
+
 package org.example.ecommerceapp.service;
 
 import org.example.ecommerceapp.dto.CartDto;
@@ -7,12 +8,13 @@ public interface CartService {
     CartDto getCart(String email);
 
     CartDto addToCart(
-            Long userId,
+            String email,
             Long productId,
             int quantity);
 
     void removeFromCart(
-            Long cartItemId);
+            Long cartItemId,
+            String email);
 
-    void clearCart(Long userId);
+    void clearCart(String email);
 }

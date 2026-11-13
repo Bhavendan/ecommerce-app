@@ -52,19 +52,15 @@ public class CartController {
             description = "Adds a product to the user's cart with the specified quantity"
     )
     public ResponseEntity<CartDto> addToCart(
-
-            @RequestParam Long userId,
-
             @RequestParam Long productId,
-
             @RequestParam int quantity) {
 
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
         return ResponseEntity.ok(
-                service.addToCart(
-                        userId,
-                        productId,
-                        quantity
-                )
+                service.addToCart(email, productId, quantity)
         );
     }
 
@@ -75,30 +71,34 @@ public class CartController {
             summary = "Remove item from cart",
             description = "Removes a specific cart item from the user's cart"
     )
+
     public ResponseEntity<Void> removeFromCart(
             @PathVariable Long cartItemId) {
 
-        service.removeFromCart(cartItemId);
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
 
-        return ResponseEntity
-                .noContent()
-                .build();
+        service.removeFromCart(cartItemId, email);
+
+        return ResponseEntity.noContent().build();
     }
 
     // CLEAR CART
 
-    @DeleteMapping("/clear/{userId}")
+    @DeleteMapping("/clear")
     @Operation(
             summary = "Clear cart",
             description = "Removes all items from the specified user's cart"
     )
-    public ResponseEntity<Void> clearCart(
-            @PathVariable Long userId) {
+    public ResponseEntity<Void> clearCart() {
 
-        service.clearCart(userId);
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
 
-        return ResponseEntity
-                .noContent()
-                .build();
+        service.clearCart(email);
+
+        return ResponseEntity.noContent().build();
     }
 }

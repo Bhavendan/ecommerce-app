@@ -62,23 +62,33 @@ public class UserServiceImpl implements UserService {
         return repo.findAll(pageable).map(this::entityToDto);
     }
 
+
     @Override
     public UserDto updateUser(Long id, UserDto dto) {
 
-        User user = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User user = repo.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
 
         user.setName(dto.getName());
 
         user.setEmail(dto.getEmail());
 
-        user.setPassword(dto.getPassword());
+        // Update password only if a new password is provided
+        if (dto.getPassword() != null &&
+                !dto.getPassword().isBlank()) {
 
+            user.setPassword(encoder.encode(dto.getPassword()));
+        }
+
+        // Role changes are allowed through the ADMIN management API
         user.setRole(dto.getRole());
 
         User updated = repo.save(user);
 
         return entityToDto(updated);
     }
+
 
     @Override
     public void deleteUser(Long id) {
@@ -114,6 +124,6 @@ public class UserServiceImpl implements UserService {
         Authentication authentication = authenticationManager.authenticate
                 (new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
-        return jwtService.generateToke(request);
+        return jwtService.generateToken(request);
     }
 }
